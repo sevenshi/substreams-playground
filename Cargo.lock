@@ -1379,6 +1379,7 @@ dependencies = [
  "num-bigint",
  "pad",
  "prost",
+ "prost-build",
  "prost-types",
  "substreams 0.0.11",
  "substreams-ethereum",

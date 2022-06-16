@@ -28,7 +28,7 @@ pub fn process(
     volumes_deltas: store::Deltas,
     reserves_deltas: store::Deltas,
     events: Events,
-    tokens: &store::StoreGet,
+    tokens: store::StoreGet,
 ) -> DatabaseChanges {
     let items = join_sort_deltas(
         pair_deltas,
@@ -39,7 +39,7 @@ pub fn process(
         events,
     );
 
-    log::info!("about! to process db_out items: {}", items.len());
+    log::info!("about! to process db_out items: {} ", items.len());
 
     let mut database_changes: DatabaseChanges = DatabaseChanges {
         table_changes: vec![],
@@ -48,7 +48,7 @@ pub fn process(
     for item in items {
         match item {
             Item::PairDelta(delta) => {
-                handle_pair_delta(delta, &block, &mut database_changes, tokens)
+                handle_pair_delta(delta, &block, &mut database_changes, &tokens)
             }
             Item::PcsTokenDelta(delta) => handle_token_delta(delta, &mut database_changes, block),
             Item::TotalDelta(delta) => handle_total_delta(delta, &mut database_changes, block),
@@ -73,8 +73,9 @@ fn handle_pair_delta(
 
     let pair: pcs::Pair = proto::decode(&delta.new_value).unwrap();
 
-    let token0 = utils::get_last_token(&tokens, pair.token0_address.as_str());
-    let token1 = utils::get_last_token(&tokens, pair.token1_address.as_str());
+    log::info!("about! to process db_out token0_address:{} token1_address:{}  ",pair.token0_address.as_str(),pair.token1_address.as_str());
+    let token0 = utils::get_last_token(&tokens, &pair.token0_address);
+    let token1 = utils::get_last_token(&tokens, &pair.token1_address);
 
     changes.table_changes.push(TableChange {
         table: "pair".to_string(),

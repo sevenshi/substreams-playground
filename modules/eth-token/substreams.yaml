@@ -10,7 +10,7 @@ package:
     for tokens.
 
 imports:
-  eth: https://github.com/streamingfast/sf-ethereum/releases/download/v0.10.2/ethereum-v0.10.4.spkg
+  eth: ./ethereum-v0.10.3.spkg
 
 protobuf:
   files:
@@ -26,7 +26,7 @@ binaries:
 modules:
   - name: map_tokens
     kind: map
-    initialBlock: 0
+    initialBlock: 6810706
     inputs:
       - source: sf.ethereum.type.v1.Block
     output:
@@ -34,6 +34,7 @@ modules:
 
   - name: store_tokens
     kind: store
+    initialBlock: 6810706
     updatePolicy: set
     valueType: proto:sf.ethereum.tokens.v1.Token
     inputs:

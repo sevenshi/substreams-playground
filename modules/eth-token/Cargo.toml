@@ -17,3 +17,6 @@ substreams-ethereum = "0.1.2"
 num-bigint = "0.4"
 bigdecimal = "0.3"
 pad = "0.1"
+
+[build-dependencies]
+prost-build = "0.10.1"

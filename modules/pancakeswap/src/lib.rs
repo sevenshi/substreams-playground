@@ -59,6 +59,30 @@ pub fn map_pairs(blk: pb::eth::Block) -> Result<pcs::Pairs, Error> {
 }
 
 #[substreams::handlers::store]
+fn store_pcs_tokens( pairs: pcs::Pairs, tokens: store::StoreGet, store: store::StoreSet) {
+
+    for pair in pairs.pairs {
+        match tokens.get_last(&format!("token:{}", pair.token0_address)) {
+            None => {
+                let key = format!("token:{}", pair.token0_address.as_str());
+                let token = rpc::retry_rpc_calls(&pair.token0_address).unwrap();
+                store.set(1, key, &proto::encode(&token).unwrap());
+            },
+            Some(_) => continue
+        }
+        match tokens.get_last(&format!("token:{}", pair.token1_address)) {
+            None => {
+                let key = format!("token:{}", pair.token1_address.as_str());
+                let token = rpc::retry_rpc_calls(&pair.token1_address).unwrap();
+                store.set(1, key, &proto::encode(&token).unwrap());
+            },
+            Some(_) => continue
+        }
+    }
+}
+
+
+#[substreams::handlers::store]
 pub fn store_pairs(pairs: pcs::Pairs, output: store::StoreSet) {
     log::info!("Building pair state");
     for pair in pairs.pairs {
@@ -547,7 +571,7 @@ pub fn map_burn_swaps_events(blk: pb::eth::Block, pairs_store: store::StoreGet, 
 }
 
 #[substreams::handlers::store]
-pub fn totals(
+pub fn store_totals(
     clock: substreams::pb::substreams::Clock,
     pairs: pcs::Pairs,
     events: pcs::Events,
@@ -607,7 +631,7 @@ pub fn totals(
 }
 
 #[substreams::handlers::store]
-pub fn volumes(
+pub fn store_volumes(
     clock: substreams::pb::substreams::Clock,
     events: pcs::Events,
     output: store::StoreAddBigFloat,
@@ -867,7 +891,7 @@ pub fn db_out(
         volumes_deltas,
         reserves_deltas,
         events,
-        &tokens,
+        tokens,
     );
 
     return Ok(changes);
